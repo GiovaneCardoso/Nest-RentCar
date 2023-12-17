@@ -1,5 +1,6 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common'
-import { AppService, ICalculate, IError } from '../Service/app.service'
+import { AppService } from '../Service/app.service'
+import { ICalculate } from 'src/interfaces/appService'
 
 @Controller()
 export class AppController {
@@ -10,7 +11,7 @@ export class AppController {
     return this.appService.getHello()
   }
   @Get(`/carCalculate/:id`)
-  calculate(@Param('id') id: string): ICalculate | IError {
+  calculate(@Param('id') id: string): ICalculate {
     try {
       return this.appService.calculate(id)
     } catch (err) {

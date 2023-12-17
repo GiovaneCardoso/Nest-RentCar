@@ -1,15 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { CarModel } from 'src/Model/CarModel'
 import { database } from 'src/database/database'
-export interface ICalculate {
-  message: string
-  winner: 'rent' | 'buy'
-  difference: number
-}
-export interface IError {
-  statusCode: number
-  message: string
-}
+import { ICalculate } from 'src/interfaces/appService'
+import { resultify } from 'src/utils/utils'
 @Injectable()
 export class AppService {
   getHello(): string {
@@ -22,14 +15,46 @@ export class AppService {
     }
 
     const carModel = new CarModel(car)
-    const buyTotal = carModel.buy()
-    const rentTotal = carModel.rent()
-    const { difference, winner } = carModel.calculateDiff(buyTotal, rentTotal)
+    const { total, ...buy } = carModel.buy()
+    const { total: rentTotal, ...rent } = carModel.rent()
+    const { difference, winner } = carModel.calculateDiff(total, rentTotal)
 
     return {
-      winner,
+      result: winner,
       message: `${winner} options is better`,
-      difference: Number(difference.toFixed(2))
+      difference: resultify(difference),
+      totalizers: [
+        {
+          type: 'buy',
+          installments: buy.installments,
+          value: buy.value,
+          installmentsTotal: buy.value * buy.installments,
+          result: total,
+          carAfterSale: buy.carAfterSale,
+          extraExpenses: [
+            {
+              type: 'IPVA',
+              value: buy.ipva
+            },
+            {
+              type: 'INSURE',
+              value: buy.insure
+            },
+            {
+              type: 'MAINTENANCE',
+              value: buy.revision
+            }
+          ]
+        },
+        {
+          type: 'rent',
+          installments: rent.installments,
+          value: rent.value,
+          installmentsTotal: rent.value * rent.installments,
+          result: total,
+          extraExpenses: []
+        }
+      ]
     }
   }
 }
