@@ -4,6 +4,7 @@ export const database: IDatabase = [
   {
     id: '1',
     name: 'Peugeot 208',
+    totalValue: 7899000,
     buyOptions: [
       {
         type: 'rent',

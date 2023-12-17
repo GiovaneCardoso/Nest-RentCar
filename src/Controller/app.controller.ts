@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common'
 import { AppService, ICalculate, IError } from '../Service/app.service'
 
 @Controller()
@@ -11,6 +11,12 @@ export class AppController {
   }
   @Get(`/carCalculate/:id`)
   calculate(@Param('id') id: string): ICalculate | IError {
-    return this.appService.calculate(id)
+    try {
+      return this.appService.calculate(id)
+    } catch (err) {
+      throw new NotFoundException({
+        message: err.message
+      })
+    }
   }
 }

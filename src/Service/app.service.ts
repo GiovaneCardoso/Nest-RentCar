@@ -15,26 +15,21 @@ export class AppService {
   getHello(): string {
     return 'Hello World!'
   }
-  calculate(carId: string): ICalculate | IError {
+  calculate(carId: string): ICalculate {
     const car = database.find(({ id }) => id === carId)
     if (!car) {
-      return {
-        statusCode: 404,
-        message: 'Car not found'
-      }
+      throw new Error('Car not found')
     }
 
     const carModel = new CarModel(car)
-
     const buyTotal = carModel.buy()
     const rentTotal = carModel.rent()
-    const winner = buyTotal > rentTotal ? 'rent' : 'buy'
+    const { difference, winner } = carModel.calculateDiff(buyTotal, rentTotal)
 
     return {
       winner,
       message: `${winner} options is better`,
-      difference:
-        winner === 'rent' ? buyTotal - rentTotal : rentTotal - buyTotal
+      difference: Number(difference.toFixed(2))
     }
   }
 }
