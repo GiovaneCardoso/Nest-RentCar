@@ -1,23 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { randomUUID } from 'crypto'
 import { CarModel } from 'src/Model/CarModel'
 import { database } from 'src/database/database'
-import { PrismaService } from 'src/database/prisma.service'
 import { ICalculate } from 'src/interfaces/appService'
 import { resultify } from 'src/utils/utils'
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
-  async getHello(): Promise<string> {
-    await this.prisma.car.create({
-      data: {
-        id: randomUUID(),
-        name: 'Renault Kwid',
-        totalValue: 7750000
-      }
-    })
-    return 'Hello World!'
-  }
   calculate(carId: string): ICalculate {
     const car = database.find(({ id }) => id === carId)
     if (!car) {
