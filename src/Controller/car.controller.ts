@@ -8,7 +8,7 @@ import {
   Post
 } from '@nestjs/common'
 import { CarService } from 'src/Service/car.service'
-import { Car } from '@prisma/client'
+import { Car, Prisma } from '@prisma/client'
 
 @Controller('cars')
 export class CarController {
@@ -34,7 +34,9 @@ export class CarController {
     return await this.carService.editCar(id, body)
   }
   @Post('/new')
-  async createCar(@Body() body: Car) {
+  async createCar(
+    @Body() body: Prisma.CarGetPayload<{ include: { optionsToAcquire: true } }>
+  ) {
     return await this.carService.createCar(body)
   }
 }

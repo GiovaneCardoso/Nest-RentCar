@@ -14,14 +14,21 @@ model Car {
   id               String            @id
   name             String
   totalValue       Int
-  optionsToAcquire optionToAcquire[]
+  optionsToAcquire OptionToAcquire[]
 }
 
-model optionToAcquire {
+model OptionToAcquire {
   id           Int    @id @default(autoincrement())
   carId        String
-  type         String
+  type         Type
   value        Int
+  installments Int    @default(0)
+  startPayment Int    @default(0)
   financingTax Int    @default(0)
   car          Car    @relation(fields: [carId], references: [id])
+}
+
+enum Type {
+  rent
+  buy
 }

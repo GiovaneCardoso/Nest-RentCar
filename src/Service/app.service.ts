@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { CarModel } from 'src/Model/CarModel'
-import { database } from 'src/database/database'
 import { ICalculate } from 'src/interfaces/appService'
 import { resultify } from 'src/utils/utils'
+import { CarService } from './car.service'
 @Injectable()
 export class AppService {
-  calculate(carId: string): ICalculate {
-    const car = database.find(({ id }) => id === carId)
+  constructor(private carService: CarService) {}
+  async calculate(carId: string): Promise<ICalculate> {
+    const car = await this.carService.getCarById(carId)
     if (!car) {
       throw new Error('Car not found')
     }

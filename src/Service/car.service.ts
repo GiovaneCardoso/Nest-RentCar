@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { Car } from '@prisma/client'
+import { Car, Prisma } from '@prisma/client'
 import { randomUUID } from 'crypto'
 import { PrismaService } from 'src/database/prisma.service'
-
+import { ICar } from 'src/interfaces/database'
+type CarPayload = Prisma.CarGetPayload<{ include: { optionsToAcquire: true } }>
 @Injectable()
 export class CarService {
   constructor(private prisma: PrismaService) {}
@@ -16,57 +17,69 @@ export class CarService {
     })
     return 'Hello World!'
   }
-  async createCar(car: Car): Promise<Car> {
-    const carToAdd = {
-      id: randomUUID(),
-      ...car
-    }
-    await this.prisma.car.create({
+  async createCar(
+    car: Prisma.CarGetPayload<{ include: { optionsToAcquire: true } }>
+  ) {
+    const carCreated = await this.prisma.car.create({
       data: {
-        ...carToAdd
+        id: randomUUID(),
+        name: car.name,
+        totalValue: car.totalValue
       }
     })
-    await this.prisma.optionToAcquire.create({
-      data: {
-        type: 'rent',
-        value: 12222,
-        carId: carToAdd.id,
-        financingTax: 1.8
-      }
+    const optionsToAcquireCreated = car.optionsToAcquire.map(async (option) => {
+      return await this.prisma.optionToAcquire.create({
+        data: {
+          carId: carCreated.id,
+          ...option
+        }
+      })
     })
 
-    return carToAdd
+    return { ...carCreated, optionsToAcquire: optionsToAcquireCreated }
   }
   async editCar(id: string, car: Partial<Car>) {
-    await this.prisma.car.update({
+    const newCar = await this.prisma.car.update({
       data: car,
       where: {
         id
       }
     })
+    return newCar
   }
   async deleteCar(carId: string) {
+    await this.prisma.optionToAcquire.deleteMany({
+      where: {
+        carId
+      }
+    })
+
     await this.prisma.car.delete({
       where: {
         id: carId
       }
     })
   }
-  async getCars(): Promise<Car[]> {
+  async getCars(): Promise<CarPayload[]> {
     return await this.prisma.car.findMany({
       include: {
         optionsToAcquire: true
       }
     })
   }
-  async getCarById(id: string): Promise<Car> {
-    return await this.prisma.car.findUniqueOrThrow({
-      where: {
-        id
-      },
-      include: {
-        optionsToAcquire: true
-      }
-    })
+  async getCarById(id: string): Promise<CarPayload> {
+    try {
+      const car = await this.prisma.car.findUniqueOrThrow({
+        where: {
+          id
+        },
+        include: {
+          optionsToAcquire: true
+        }
+      })
+      return car
+    } catch {
+      throw new Error('Error')
+    }
   }
 }

@@ -5,9 +5,8 @@ export class CarModel {
   constructor(private readonly car: ICar) {}
 
   calculateBase(typeCalc: 'rent' | 'buy') {
-    const {
-      data: { installments, startPayment, value }
-    } = this.car.buyOptions.find(({ type }) => type === typeCalc)
+    const { installments, startPayment, value } =
+      this.car.optionsToAcquire.find(({ type }) => type === typeCalc)
     const total = installments * value + startPayment
     return { total, installments, startPayment, value }
   }

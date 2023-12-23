@@ -3,15 +3,14 @@ export interface ICar {
   id: string
   name: string
   totalValue: number
-
-  buyOptions: IBuyOptions[]
+  optionsToAcquire: IBuyOptions[]
 }
 export interface IBuyOptions {
+  id: number
+  carId: string
   type: 'rent' | 'buy'
-  data: IBuyOptionsData
-}
-export interface IBuyOptionsData {
-  startPayment: number
-  installments: number
   value: number
+  financingTax: number
+  installments: number
+  startPayment: number
 }
